@@ -87,13 +87,15 @@ def save_nodes(city_name: str, nodes_gdf):
         lon = props.get("x")
         point = Point(lon, lat)
 
-        Node.objects.create(
+        Node.objects.update_or_create(
             id=node_id,
             city=city,
-            lat=lat,
-            lon=lon,
-            elevation=0.0,
-            geom=point,
+            defaults={
+                'lat': lat,
+                'lon': lon,
+                'elevation': 0.0,
+                'geom': point
+            }
         )
 
     print(f"Saved {len(nodes_geojson['features'])} nodes to the database.")
@@ -120,12 +122,13 @@ def save_edge_nodes(city_name: str, edges_gdf, nodes_gdf):
 
             if node_id:
                 node = Node.objects.get(id=node_id, city=city)
-                EdgeNode.objects.create(
+                EdgeNode.objects.update_or_create(
                     edge=edge,
                     node=node,
-                    position=position
+                    position=position,
+                    defaults={
+                    }
                 )
-
     print(f"Saved EdgeNode relationships to the database.")
 
 
