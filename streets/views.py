@@ -1,21 +1,6 @@
 import numpy as np
 from django.shortcuts import render
-from django.http import HttpResponse
-import osmnx as ox
-from django.contrib.gis.geos import LineString
-from django.contrib.gis.geos import Point
-
-from streets.models import GeoAreaMapping, EdgeNode, City, Node, Edge
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.http import JsonResponse
 import json
-from django.db import transaction
-from django.http import JsonResponse
-from .models import Node, Edge
-from django.http import JsonResponse
 from .models import Node, Edge, EdgeNode
 from django.http import JsonResponse
 from .models import City, CityWalkabilityMetrics, CityBikeabilityMetrics

@@ -169,6 +169,6 @@ This page provides various metrics for each city, such as walkability, bikeabili
 ### 3. Similar Cities
 URL: [http://localhost:8000/similar-cities/](http://localhost:8000/similar-cities/)
 
-This page allows users to compare cities based on their street network metrics. The dashboard will display a list of cities that are similar to the selected city, based on metrics like intersection density and street connectivity.
+This page allows users to compare cities based on their street network metrics. The dashboard will display a list of cities that are similar to the selected city, based on the final similarity score.
 
 ![Similar Cities](streets/static/img/similar_cities.jpg)

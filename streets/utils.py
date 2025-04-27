@@ -274,7 +274,6 @@ def calculate_urban_metrics(city_name: str):
 
     connectivity = total_degree / node_count if node_count > 0 else 0
 
-    # 返回所有指标
     return {
         'average_circuity': average_circuity,
         'street_angle_entropy': entropy,
