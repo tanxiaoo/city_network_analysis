@@ -1,17 +1,11 @@
 # City Network Analysis
-
 This is the repository for the projects of the Geoinformatics Project course held in 2025 at Polimi.
-
 **Supervisors**: Juan Pablo Duque, Maria Brovelli
 
 ## Project Overview
-
 This project aims to develop an automated pipeline to extract urban street network data from OpenStreetMap (OSM), compute network-based walkability and bikeability indicators, and build a WebGIS system to enable users to compare and match similar cities based on street network features.
 
-The project methodology is inspired by recent research utilizing multimodal and multiscale street network representations.
-
 ## Data Sources
-
 - **OpenStreetMap (OSM)**: Global open-source street network data.
 - **NASADEM**: Global digital elevation model (30m resolution) for obtaining node elevation.
 - **GHS Urban Centre Database (GHS-UCDB R2024A)**: Provides city boundaries and built-up areas.
@@ -59,7 +53,6 @@ city_network_analysis/
 ### WebGIS Development
 - Interactive visualization using Leaflet.
 - Backend API to query metrics and find similar cities.
-
 
 ## Database
 ```mermaid
@@ -149,26 +142,20 @@ erDiagram
 ```
 
 ## Dashboard
-
 The project includes an interactive dashboard to visualize and explore the urban street network metrics for different cities. It provides three main views that you can access via the following URLs:
 
 ### 1. Map View
 URL: [http://localhost:8000/db_map/](http://localhost:8000/db_map/)
-
 This page displays an interactive map of the city's street network, allowing users to explore the spatial distribution of streets, nodes, and other features.
 
 ![Map View](streets/static/img/map.jpg)
 
 ### 2. City Metrics
 URL: [http://localhost:8000/city-metrics/](http://localhost:8000/city-metrics/)
-
 This page provides various metrics for each city, such as walkability, bikeability, and connectivity scores. The metrics are calculated based on the network structure and are displayed in a user-friendly format.
-
 ![City Metrics](streets/static/img/city_metrics.jpg)
 
 ### 3. Similar Cities
 URL: [http://localhost:8000/similar-cities/](http://localhost:8000/similar-cities/)
-
 This page allows users to compare cities based on their street network metrics. The dashboard will display a list of cities that are similar to the selected city, based on the final similarity score.
-
 ![Similar Cities](streets/static/img/similar_cities.jpg)
