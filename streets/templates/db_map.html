@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Network</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+    <div id="map" style="height: 600px;"></div>
+    <button id="toggleMap" style="position: absolute; top: 10px; left: 10px; z-index: 999;">Toggle Base Map</button>
+
+    <script>
+        const map = L.map('map').setView([45.4642, 9.1900], 13);  // Milan coordinates
+
+        // Add the OpenStreetMap tile layer
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+        osmLayer.addTo(map);
+
+        // Fetch the network data (nodes and edges) from the API
+        fetch('/api/db_map/') // 访问后端API接口
+            .then(response => response.json())
+            .then(data => {
+                const { nodes, edges } = data;
+
+                // Add nodes (as markers)
+                nodes.features.forEach(node => {
+                    const lat = node.geometry.coordinates[1];
+                    const lon = node.geometry.coordinates[0];
+                    L.marker([lat, lon]).addTo(map)
+                        .bindPopup(`<b>Node ID:</b> ${node.properties.id}<br><b>Name:</b> ${node.properties.name}`);
+                });
+
+                // Add edges (as lines)
+                edges.features.forEach(edge => {
+                    const coordinates = edge.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                    L.polyline(coordinates, { color: 'blue' }).addTo(map)
+                        .bindPopup(`<b>Edge ID:</b> ${edge.properties.id}<br><b>Name:</b> ${edge.properties.name}`);
+                });
+            })
+            .catch(error => console.error('Error fetching network data:', error));
+
+        // Toggle the base map visibility
+        let baseMapVisible = true;
+        document.getElementById('toggleMap').onclick = () => {
+            if (baseMapVisible) {
+                map.removeLayer(osmLayer);  // Remove base map
+            } else {
+                osmLayer.addTo(map);  // Re-add base map
+            }
+            baseMapVisible = !baseMapVisible;
+        };
+    </script>
+</body>
+</html>

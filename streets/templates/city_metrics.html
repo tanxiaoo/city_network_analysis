@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>City Metrics Query</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 30px;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: #fff;
+            padding: 20px 40px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 16px;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #loading {
+            display: none;
+            color: #555;
+            margin-top: 10px;
+        }
+        #error {
+            color: red;
+            margin-top: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            text-align: center;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 12px;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        #result {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>City Metrics Query</h1>
+        <div style="text-align: center;">
+            <input type="text" id="cityNameInput" placeholder="Enter city name">
+            <button onclick="fetchMetrics()">Search</button>
+        </div>
+        <div id="loading">Loading...</div>
+        <div id="error"></div>
+        <div id="result"></div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="findSimilarCities()">Find Similar Cities</button>
+        </div>
+    </div>
+
+    <script>
+        function fetchMetrics() {
+            const cityName = document.getElementById('cityNameInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            const loadingDiv = document.getElementById('loading');
+
+            resultDiv.innerHTML = '';
+            errorDiv.innerHTML = '';
+
+            if (!cityName) {
+                errorDiv.innerHTML = 'Please enter a city name.';
+                return;
+            }
+
+            loadingDiv.style.display = 'block';
+
+            fetch(`/api/city-metrics/?city_name=${encodeURIComponent(cityName)}`)
+                .then(response => {
+                    loadingDiv.style.display = 'none';
+                    if (!response.ok) {
+                        throw new Error('City not found or no data available.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    resultDiv.innerHTML = generateTables(data);
+                })
+                .catch(error => {
+                    errorDiv.innerHTML = error.message;
+                });
+        }
+
+        function generateTables(data) {
+            let walkKeys = Object.keys(data.walkability_metrics);
+            let bikeKeys = Object.keys(data.bikeability_metrics);
+
+            let walkabilityTable = `<h2>${data.city} - Walkability Metrics</h2><table><thead><tr>`;
+            walkKeys.forEach(key => {
+                walkabilityTable += `<th>${key}</th>`;
+            });
+            walkabilityTable += `</tr></thead><tbody><tr>`;
+            walkKeys.forEach(key => {
+                walkabilityTable += `<td>${data.walkability_metrics[key]}</td>`;
+            });
+            walkabilityTable += `</tr></tbody></table>`;
+
+            let bikeabilityTable = `<h2>${data.city} - Bikeability Metrics</h2><table><thead><tr>`;
+            bikeKeys.forEach(key => {
+                bikeabilityTable += `<th>${key}</th>`;
+            });
+            bikeabilityTable += `</tr></thead><tbody><tr>`;
+            bikeKeys.forEach(key => {
+                bikeabilityTable += `<td>${data.bikeability_metrics[key]}</td>`;
+            });
+            bikeabilityTable += `</tr></tbody></table>`;
+
+            return walkabilityTable + bikeabilityTable;
+        }
+
+        function findSimilarCities() {
+            const cityName = document.getElementById('cityNameInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            const loadingDiv = document.getElementById('loading');
+
+            resultDiv.innerHTML = '';
+            errorDiv.innerHTML = '';
+
+            if (!cityName) {
+                errorDiv.innerHTML = 'Please enter a city name.';
+                return;
+            }
+
+            loadingDiv.style.display = 'block';
+
+            fetch(`/api/find-similar-cities/?city_name=${encodeURIComponent(cityName)}&top_n=5`)
+                .then(response => {
+                    loadingDiv.style.display = 'none';
+                    if (!response.ok) {
+                        throw new Error('No similar cities found.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        errorDiv.innerHTML = data.error;
+                    } else {
+                        resultDiv.innerHTML = generateSimilarCitiesTable(data.similar_cities);
+                    }
+                })
+                .catch(error => {
+                    errorDiv.innerHTML = error.message;
+                });
+        }
+
+        function generateSimilarCitiesTable(similarCities) {
+            let tableHTML = `<h2>Similar Cities</h2><table><thead><tr><th>City</th><th>Walkability Score</th><th>Bikeability Score</th><th>Similarity Score</th></tr></thead><tbody>`;
+
+            similarCities.forEach(city => {
+                tableHTML += `<tr><td>${city.city}</td><td>${city.walkability_score}</td><td>${city.bikeability_score}</td><td>${city.similarity_score}</td></tr>`;
+            });
+
+            tableHTML += `</tbody></table>`;
+            return tableHTML;
+        }
+    </script>
+</body>
+</html>
