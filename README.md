@@ -147,3 +147,28 @@ erDiagram
         float SCO
     }
 ```
+
+## Dashboard
+
+The project includes an interactive dashboard to visualize and explore the urban street network metrics for different cities. It provides three main views that you can access via the following URLs:
+
+### 1. Map View
+URL: [http://localhost:8000/db_map/](http://localhost:8000/db_map/)
+
+This page displays an interactive map of the city's street network, allowing users to explore the spatial distribution of streets, nodes, and other features.
+
+![Map View](streets/static/img/map.jpg)
+
+### 2. City Metrics
+URL: [http://localhost:8000/city-metrics/](http://localhost:8000/city-metrics/)
+
+This page provides various metrics for each city, such as walkability, bikeability, and connectivity scores. The metrics are calculated based on the network structure and are displayed in a user-friendly format.
+
+![City Metrics](streets/static/img/city_metrics.jpg)
+
+### 3. Similar Cities
+URL: [http://localhost:8000/similar-cities/](http://localhost:8000/similar-cities/)
+
+This page allows users to compare cities based on their street network metrics. The dashboard will display a list of cities that are similar to the selected city, based on metrics like intersection density and street connectivity.
+
+![Similar Cities](streets/static/img/similar_cities.jpg)
