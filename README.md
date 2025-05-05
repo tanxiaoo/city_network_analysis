@@ -1,5 +1,6 @@
 # City Network Analysis
 This is the repository for the projects of the Geoinformatics Project course held in 2025 at Polimi.
+
 **Supervisors**: Juan Pablo Duque, Maria Brovelli
 
 ## Project Overview
