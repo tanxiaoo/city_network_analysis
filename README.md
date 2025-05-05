@@ -50,50 +50,47 @@ erDiagram
     Node ||--o{ Edge : "end_node"
 
     GeoAreaMapping {
-        char geo_area PK "Primary key (2-char code)"
+        char geo_area PK "2-character code (primary key)"
         string full_name "Full name of geographic area"
     }
 
     City {
-        int id PK "Primary key"
-        string name "City name (unique)"
+        int id PK "Auto-generated ID"
+        string name "Unique city name"
         string country "Country name"
         char geo_area FK "FK to GeoAreaMapping"
-        int population "Population (optional)"
-        float area_km2 "Total area in square km"
-        float built_up_area_km2 "Built-up area in square km"
-        multipolygon geom "Geometry of city (optional)"
+        int population "Population (nullable)"
+        float area_km2 "Area in square kilometers"
+        float built_up_area_km2 "Built-up area in square kilometers"
+        multipolygon geom "Geometry of the city (nullable)"
     }
 
     Metric {
-        int id PK "Primary key"
+        int id PK "Auto-generated ID"
         string name "Metric name"
-        string type "walk or bike"
+        string type "Metric type: walk or bike"
     }
 
     MetricValue {
-        int id PK "Primary key"
+        int id PK "Auto-generated ID"
         int metric_id FK "FK to Metric"
         int city_id FK "FK to City"
         float value "Metric value"
-        datetime datetime "Timestamp of record"
+        datetime datetime "Timestamp"
     }
 
     Node {
-        int id PK "Primary key"
+        bigint osm_id PK "OpenStreetMap node ID"
         int city_id FK "FK to City"
-        bigint osm_id "OpenStreetMap node ID (optional, unique)"
-        float elevation "Elevation (optional)"
-        point geom "Geographic point"
+        point geom "Geographic location (WGS84)"
     }
 
     Edge {
-        int id PK "Primary key"
+        int id PK "Auto-generated ID"
         int city_id FK "FK to City"
-        int start_node_id FK "FK to Node (start)"
-        int end_node_id FK "FK to Node (end)"
-        linestring geom "Geographic line"
-        json data "Includes: name, length (m), mode, speed_limit (km/h), edge_type"
+        bigint start_node_id FK "Start node (FK to Node)"
+        bigint end_node_id FK "End node (FK to Node)"
+        linestring geom "Line geometry (WGS84)"
     }
 ```
 ## API Design

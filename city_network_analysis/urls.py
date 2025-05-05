@@ -33,4 +33,6 @@ urlpatterns = [
     # path('api/db_map/', views.get_data, name='network_data'),
     path('city-metrics/', views.city_metrics_page, name='city_metrics_page'),
     path('api/', include(router.urls)),
+    path('geojson/edges/', views.EdgeGeoJSONView.as_view(), name='geojson-edges'),
+    path('geojson/nodes/', views.NodeGeoJSONView.as_view(), name='geojson-nodes'),
 ]

@@ -1,3 +1,4 @@
+import ast
 import json
 import osmnx as ox
 from django.contrib.gis.geos import Point
@@ -6,6 +7,8 @@ from .models import City, Node, Edge, MetricValue, Metric
 from math import log
 from django.utils import timezone
 import numpy as np
+import networkx as nx
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def fetch_data(city_name: str, country: str, modality: str = "drive"):
@@ -135,6 +138,164 @@ def save_edges(city_name: str, edges_gdf, modality: str = "drive"):
     print(f"Saved {len(edges_geojson['features'])} edges to the database.")
 
 
+def save_graphml_nodes(city_name: str, graphml_path: str, ):
+    try:
+        city = City.objects.get(name=city_name)
+    except City.DoesNotExist:
+        print(f"City {city_name} not found.")
+        return
+
+    print(f"Importing {city.name} graphml file...")
+    G = nx.read_graphml(graphml_path)
+
+    created_count = 0
+    skipped_count = 0
+    sample_node = list(G.nodes(data=True))[0]
+    print(f"Sample node data: {sample_node}")
+
+    for node_id, data in G.nodes(data=True):
+        osm_id = data.get('osmid', node_id)
+        try:
+            x = float(data['x'])
+            y = float(data['y'])
+        except(TypeError, ValueError):
+            skipped_count += 1
+            continue
+
+        obj, created = Node.objects.update_or_create(
+            osm_id=osm_id,
+            city=city,
+            defaults={
+                'elevation': float(data.get('elevation', 0.0)),
+                'geom': Point(x, y),
+            }
+
+        )
+
+        if created:
+            created_count += 1
+
+    print(f"Nodes imported or updated: {created_count}, skipped: {skipped_count}")
+
+
+def save_graphml_edges(city_name: str, graphml_path: str):
+    try:
+        city = City.objects.get(name=city_name)
+    except City.DoesNotExist:
+        print(f"City {city_name} not found.")
+        return
+
+    print(f"Importing edges for {city.name} from graphml file...")
+    G = nx.read_graphml(graphml_path)
+
+    created_count = 0
+    skipped_count = 0
+
+    for source, target, edge_data in G.edges(data=True):
+        try:
+            start_node = Node.objects.get(osm_id=int(source), city=city)
+            end_node = Node.objects.get(osm_id=int(target), city=city)
+        except (ObjectDoesNotExist, ValueError, KeyError) as e:
+            print(f"Skipping edge  {source}→{target}: node lookup failed - {e}")
+            skipped_count += 1
+            continue
+
+        try:
+            wkt_geom = edge_data['geometry']
+            coords_str = wkt_geom.replace('LINESTRING (', '').replace(')', '')
+            coords = [tuple(map(float, point.split())) for point in coords_str.split(', ')]
+            linestring = LineString(coords)
+        except (KeyError, ValueError, AttributeError) as e:
+            print(f"Skipping edge {source}→{target}: invalid geometry - {e}")
+            skipped_count += 1
+            continue
+
+        edge, created = Edge.objects.update_or_create(
+            city=city,
+            start_node=start_node,
+            end_node=end_node,
+            defaults={
+                'geom': linestring,
+            }
+        )
+
+        if created:
+            created_count += 1
+
+    print(f"Edges imported: {created_count}, skipped: {skipped_count}")
+
+
+# def save_graphml_edges(city_name: str, graphml_path: str):
+#     try:
+#         city = City.objects.get(name=city_name)
+#     except City.DoesNotExist:
+#         print(f"City {city_name} not found.")
+#         return
+#
+#     print(f"Importing edges for {city.name} from graphml file...")
+#     G = nx.read_graphml(graphml_path)
+#
+#     created_count = 0
+#     skipped_count = 0
+#
+#     for source, target, edge_data in G.edges(data=True):
+#         try:
+#             start_node = Node.objects.get(osm_id=int(source), city=city)
+#             end_node = Node.objects.get(osm_id=int(target), city=city)
+#         except (ObjectDoesNotExist, ValueError, KeyError) as e:
+#             print(f"Skipping edge  {source}→{target}: node lookup failed - {e}")
+#             skipped_count += 1
+#             continue
+#
+#         try:
+#             wkt_geom = edge_data['geometry']
+#             coords_str = wkt_geom.replace('LINESTRING (', '').replace(')', '')
+#             coords = [tuple(map(float, point.split())) for point in coords_str.split(', ')]
+#             linestring = LineString(coords)
+#         except (KeyError, ValueError, AttributeError) as e:
+#             print(f"Skipping edge {source}→{target}: invalid geometry - {e}")
+#             skipped_count += 1
+#             continue
+#
+#         valid_edge_types = ['highway', 'urban', 'rural', 'alley']
+#
+#         edge_attributes = {
+#             'name': edge_data.get('name'),
+#             'length': parse_float(edge_data.get('length', 0)),
+#             'mode': edge_data.get('driving'),  # valid_modes = ['pedestrian', 'driving', 'cycling', 'public_transport']
+#             'speed_limit': parse_float(edge_data.get('maxspeed', 0)),
+#             'edge_type': edge_data.get('highway') if edge_data.get('highway') in valid_edge_types else None
+#         }
+#
+#         edge, created = Edge.objects.update_or_create(
+#             city=city,
+#             start_node=start_node,
+#             end_node=end_node,
+#             defaults={
+#                 'geom': linestring,
+#                 'data': edge_attributes
+#             }
+#         )
+#
+#         if created:
+#             created_count += 1
+#
+#     print(f"Edges imported: {created_count}, skipped: {skipped_count}")
+
+
+def parse_float(value):
+    try:
+        return float(value)
+    except ValueError:
+        try:
+            value_list = ast.literal_eval(value)
+            if isinstance(value_list, list) and value_list:
+                return float(value_list[0])
+        except (ValueError, SyntaxError):
+            pass
+    return 0.0
+
+
 def save_metric_values(city_name: str):
     try:
         city = City.objects.get(name=city_name)
@@ -207,7 +368,8 @@ def calculate_urban_metrics(city_name: str):
     for edge in Edge.objects.filter(city=city).select_related('start_node', 'end_node'):
         node1, node2 = edge.start_node, edge.end_node
         if node1 and node2:
-            elevation_difference = abs(node1.elevation - node2.elevation) if node1.elevation is not None and node2.elevation is not None else 0
+            elevation_difference = abs(
+                node1.elevation - node2.elevation) if node1.elevation is not None and node2.elevation is not None else 0
             horizontal_distance = edge.geom.length  # 直接使用 geom 的长度作为水平距离
             if horizontal_distance > 0:
                 steepness = elevation_difference / horizontal_distance
@@ -366,3 +528,5 @@ def calculate_walking_score(speed_limit, has_pedestrian_access):
                 return 0.3
     else:
         return 0.7 if has_pedestrian_access else 0.3
+
+

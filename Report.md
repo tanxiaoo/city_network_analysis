@@ -259,7 +259,7 @@ Returns edges belonging to specified city.
 **Query Parameters**:
 - `city`: 1
 
-## Postman Collection
+**## Postman Collection
 
 A full Postman collection is provided for testing and reproducibility.
 
@@ -299,5 +299,5 @@ A full Postman collection is provided for testing and reproducibility.
 - `DELETE /api/edges/{id}/` - Delete Edge
 
 **Access the collection**:  
-[Postman Collection Link](https://xiaotan-6436217.postman.co/workspace/xiao-tan's-Workspace~73cb4ce1-4af2-4705-896a-9af5177494b9/collection/44577322-cd2a15fa-72f4-4adb-96b3-b6583872cb4c?action=share&creator=44577322)
-
+- [Postman Collection Link](https://xiaotan-6436217.postman.co/workspace/xiao-tan's-Workspace~73cb4ce1-4af2-4705-896a-9af5177494b9/collection/44577322-cd2a15fa-72f4-4adb-96b3-b6583872cb4c?action=share&creator=44577322)
+- You can also import the Urban Metrics API.postman_collection.json file provided in the repository directly into Postman.

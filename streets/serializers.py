@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import MetricValue, Metric, City, Node, Edge
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 
 class CitySerializer(serializers.ModelSerializer):
@@ -51,3 +52,17 @@ class EdgeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Edge
         fields = '__all__'
+
+
+class NodeGeoJSONSerializer(GeoFeatureModelSerializer):
+    class Meta:
+        model = Node
+        geo_field = 'geom'
+        fields = []
+
+
+class EdgeGeoJSONSerializer(GeoFeatureModelSerializer):
+    class Meta:
+        model = Edge
+        geo_field = 'geom'
+        fields = []
