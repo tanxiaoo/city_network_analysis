@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  db:
+    image: postgis/postgis
+    environment:
+      POSTGRES_DB: city_networks
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 000000
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - city_network_analysis_network
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - city_network_analysis_network
+    environment:
+      DJANGO_DB_NAME: city_networks
+      DJANGO_DB_USER: postgres
+      DJANGO_DB_PASSWORD: 000000
+      DJANGO_DB_HOST: db
+      DJANGO_DB_PORT: 5432
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  city_network_analysis_network:
+    driver: bridge

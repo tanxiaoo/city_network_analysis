@@ -1,0 +1,734 @@
+{
+	"info": {
+		"_postman_id": "cd2a15fa-72f4-4adb-96b3-b6583872cb4c",
+		"name": "Urban Metrics API",
+		"description": "A collection of all API endpoints for the urban metrics system.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44577322",
+		"_collection_link": "https://xiaotan-6436217.postman.co/workspace/xiao-tan's-Workspace~73cb4ce1-4af2-4705-896a-9af5177494b9/collection/44577322-cd2a15fa-72f4-4adb-96b3-b6583872cb4c?action=share&source=collection_link&creator=44577322"
+	},
+	"item": [
+		{
+			"name": "City",
+			"item": [
+				{
+					"name": "Get All Cities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/cities/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"cities",
+								""
+							]
+						},
+						"description": "### **GET /api/cities/**\n\n**Description:**  \nReturns a list of all cities in the system."
+					},
+					"response": []
+				},
+				{
+					"name": "Create City",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Berlin\",\n    \"country\": \"Germany\",\n    \"population\": 3600000,\n    \"area_km2\": 891.8,\n    \"built_up_area_km2\": 310.4,\n    \"geom\": null,\n    \"geo_area\": \"EU\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/cities/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"cities",
+								""
+							]
+						},
+						"description": "**POST /api/cities/**\n\n**Description:**  \nCreates a new city entry in the database. The following fields are required:\n\n- `name` (unique): The name of the city.\n    \n- `country`: The country in which the city is located.\n    \n- `geo_area`: A two-letter code referencing a geographical area from the `GeoAreaMapping` model.\n    \n- `population`: The population of the city (optional, can be null).\n    \n- `area_km2`: The area of the city in square kilometers.\n    \n- `built_up_area_km2`: The built-up area in square kilometers.\n    \n\n**Constraints:**\n\n- `name` must be unique.\n    \n- `geo_area` must reference an existing `GeoAreaMapping`."
+					},
+					"response": []
+				},
+				{
+					"name": "Update City",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Berlin\",\n    \"country\": \"Germany\",\n    \"geo_area\": \"EU\",\n    \"population\": 3700000,\n    \"area_km2\": 891.8,\n    \"built_up_area_km2\": 315.0\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/cities/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"cities",
+								"1"
+							]
+						},
+						"description": "### **PUT /api/cities/{id}**\n\n**Description:**  \nUpdates an existing city's data. The city is identified by the `id` parameter in the URL.\n\n**Constraints:**\n\n- `name` must remain unique after update.\n    \n- `geo_area` must reference an existing `GeoAreaMapping`."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete City",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/cities/30/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"cities",
+								"30",
+								""
+							]
+						},
+						"description": "### **DELETE /api/cities/{id}**\n\n**Description:**  \nDeletes a city entry from the database based on the provided `id`."
+					},
+					"response": []
+				}
+			],
+			"description": "This folder contains the endpoints related to the `City` model, which represents cities in the system. A city is characterized by attributes like name, country, geographic area, population, area in square kilometers, and its geometry. The city model is crucial for linking various metrics, nodes, and edges."
+		},
+		{
+			"name": "Metric",
+			"item": [
+				{
+					"name": "Get All Metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/metrics/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"metrics",
+								""
+							]
+						},
+						"description": "GET /api/metrics/  \nReturns a list of all metrics available in the system."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Metric",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"name\": \"SCO\",\r\n        \"type\": \"bike\"\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/metrics/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"metrics",
+								""
+							]
+						},
+						"description": "### **POST /api/metrics/**\n\n**Description:**  \nCreates a new metric. The metric can either be of type `walk` or `bike` based on the `type` field.\n\n**Constraints:**\n\n- `name` must be unique for each type (no duplicates of `name` within the same type).\n    \n- `type` must be one of: `walk`, `bike`."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Metric",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"ABS\",\n    \"type\": \"walk\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/metrics/19/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"metrics",
+								"19",
+								""
+							]
+						},
+						"description": "### **PUT /api/metrics/{id}**\n\n**Description:**\n\nUpdates an existing metric based on the `id` provided.\n\n**Constraints:**\n\n- `name` must remain unique within its `type` after update.\n    \n- `type` must remain either `walk` or `bike`."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Metric",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/metrics/20/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"metrics",
+								"20",
+								""
+							]
+						},
+						"description": "### **DELETE /api/metrics/{id}**\n\n**Description:**  \nDeletes a metric from the database based on the `id` parameter."
+					},
+					"response": []
+				}
+			],
+			"description": "This folder contains the endpoints related to the `Metric` model, which defines different metrics for assessing urban features. Metrics can be related to walkability or bikeability, representing various aspects of city infrastructure that impact mobility, accessibility, and overall urban planning."
+		},
+		{
+			"name": "MetricValue",
+			"item": [
+				{
+					"name": "Get All Metric Values",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/metric-values/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"metric-values",
+								""
+							]
+						},
+						"description": "### **GET /api/metricvalues/**\n\n**Description:**  \nReturns a list of all metric values in the system."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Filtered Metric Value",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/metric-values/?city_name=Milan&start_date=2025-05-01&end_date=2025-05-12",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"metric-values",
+								""
+							],
+							"query": [
+								{
+									"key": "city_name",
+									"value": "Milan"
+								},
+								{
+									"key": "metric_name",
+									"value": "CIR",
+									"disabled": true
+								},
+								{
+									"key": "metric_type",
+									"value": "walk",
+									"disabled": true
+								},
+								{
+									"key": "start_date",
+									"value": "2025-05-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2025-05-12"
+								}
+							]
+						},
+						"description": "### **GET /api/metricvalues/**\n\n**Description:**\n\nThis endpoint allows you to retrieve a filtered list of metric values based on specified query parameters. You can filter the results by the following parameters:\n\n- **city_name**: Filter the results based on the name of the city (e.g., `Milan`).\n    \n- **metric_name**: Filter the results based on the name of the metric (e.g., `CIR`).\n    \n- **metric_type**: Filter the results by metric type, which could be `walk` or `bike`.\n    \n- **start_date**: Filter the results by the start date of the metric value (e.g., `2025-05-01`).\n    \n- **end_date**: Filter the results by the end date of the metric value (e.g., `2025-05-12`).\n    \n\nThe combination of these filters will return the metric values that match all provided criteria. If no parameters are provided, it will return all available metric values in the system."
+					},
+					"response": []
+				},
+				{
+					"name": "Create MetricValue",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"value\": 5.0,\r\n        \"datetime\": \"2025-05-03T10:00:00Z\",\r\n        \"metric\": 1,\r\n        \"city\": 1\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/metric-values/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"metric-values",
+								""
+							]
+						},
+						"description": "### **POST /api/metricvalues/**\n\n**Description:**  \nCreates a new metric value entry. A metric value is associated with a specific `metric` and `city`.\n\n**Constraints:**\n\n- `metric` must refer to an existing `Metric`.\n    \n- `city` must refer to an existing `City`.\n    \n- `datetime` must be a valid datetime.\n    \n- `unique_together` constraint ensures that a combination of `metric`, `city`, and `datetime` is unique."
+					},
+					"response": []
+				},
+				{
+					"name": "Update MetricValue",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"metric\": 1,\n    \"city\": 1,\n    \"value\": 0.80,\n    \"datetime\": \"2025-05-03T08:30:28.966556\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/metric-values/1/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"metric-values",
+								"1",
+								""
+							]
+						},
+						"description": "### **PUT /api/metricvalues/{id}**\n\n**Description:**  \nUpdates an existing metric value entry.\n\n**Constraints:**\n\n- `metric` and `city` must still refer to existing entries.\n    \n- `datetime` must be valid and unique for each `metric` and `city` pair."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete MetricValue",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/metric-values/14/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"metric-values",
+								"14",
+								""
+							]
+						},
+						"description": "### **DELETE /api/metricvalues/{id}**\n\n**Description:**  \nDeletes a metric value based on the `id` parameter."
+					},
+					"response": []
+				}
+			],
+			"description": "This folder contains the endpoints related to the `MetricValue` model. A `MetricValue` represents a specific value for a metric in a particular city at a specific point in time. These values are essential for tracking and analyzing changes in city metrics over time."
+		},
+		{
+			"name": "Node",
+			"item": [
+				{
+					"name": "Get All Nodes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/nodes/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"nodes",
+								""
+							]
+						},
+						"description": "### **GET /api/nodes/**\n\n**Description:**  \nReturns a list of all nodes stored in the system."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Nodes By City",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/nodes/?city=1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"nodes",
+								""
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": "1"
+								}
+							]
+						},
+						"description": "### **GET /api/nodes/?city={city_id}**\n\n**Description:**  \nReturns a list of nodes filtered by the specified city ID.  \nIf no query parameter is provided, all nodes are returned."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Node",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"osm_id\": 123,\r\n    \"elevation\": 100,\r\n    \"geom\": \"SRID=4326;POINT (9 45)\",\r\n    \"city\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/nodes/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"nodes",
+								""
+							]
+						},
+						"description": "### **POST /api/nodes/**\n\n**Description:**  \nCreates a new node associated with a specific city.  \nThe `geom` field must be in WKT format and prefixed with SRID .  \nThe `osm_id` is optional but must be unique if provided, typically used to store the original ID from OpenStreetMap."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Node",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"osm_id\": 124,\r\n    \"elevation\": 100,\r\n    \"geom\": \"SRID=4326;POINT (9 45)\",\r\n    \"city\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/nodes/11/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"nodes",
+								"11",
+								""
+							]
+						},
+						"description": "### **PUT /api/nodes/{id}**\n\n**Description:**  \nUpdates an existing node by its ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Node",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/nodes/12/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"nodes",
+								"12",
+								""
+							]
+						},
+						"description": "### **DELETE /api/nodes/{id}**\n\n**Description:**  \nDeletes a node from the system based on the provided node ID."
+					},
+					"response": []
+				}
+			],
+			"description": "This folder contains the endpoints related to the `Node` model, which represents individual points (nodes) in a city's street network. Nodes are used to define the locations of intersections, points of interest, or other key locations in the network. They are connected by edges to form the street network."
+		},
+		{
+			"name": "Edge",
+			"item": [
+				{
+					"name": "Get All Edges",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/edges/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"edges",
+								""
+							]
+						},
+						"description": "### **GET /api/edges/**\n\n**Description:**  \nReturns a list of all edges in the system."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Edges By City",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/edges/?city=1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"edges",
+								""
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": "1"
+								}
+							]
+						},
+						"description": "### **GET /api/edges/?city={city_id}**\n\n**Description:**  \nReturns a list of edges that belong to the specified city."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Edge",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"city\": 1,  \r\n    \"start_node\": 11,  \r\n    \"end_node\": 12,  \r\n    \"geom\": \"LINESTRING(30.2672 97.7431, 30.2673 97.7432)\",\r\n    \"data\": {\r\n        \"name\": \"Main Street\",\r\n        \"length\": 200,\r\n        \"mode\": \"driving\",\r\n        \"speed_limit\": 50,\r\n        \"edge_type\": \"highway\"\r\n    }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/edges/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"edges",
+								""
+							]
+						},
+						"description": "### **POST /api/edges/**\n\n**Description:**  \nCreates a new edge entry, representing a connection between two nodes. An edge connects two nodes with a specific geometry and may include additional metadata like name, length, mode of transportation, speed limit, and edge type.\n\n**Constraints:**\n\n- `start_node` and `end_node` must refer to existing nodes.\n    \n- `geom` must be a valid `LINESTRING` geometry.\n    \n- `city` must refer to an existing City.\n    \n- `data` should contain valid values for the following fields:\n    \n    - `name`: The name of the edge (e.g., street name).\n        \n    - `length`: The length of the edge in meters (must be a positive number).\n        \n    - `mode`: The mode of transportation on the edge. Possible values are `pedestrian`, `driving`, `cycling`,`public_transport`.\n        \n    - `speed_limit`: The speed limit for the edge in km/h (must be a positive number).\n        \n    - `edge_type`: The type of the edge. Possible values are `highway`, `urban`, `rural`, `alley`."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Edge",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"city\": 1,  \r\n    \"start_node\": 11,  \r\n    \"end_node\": 12,  \r\n    \"geom\": \"LINESTRING(30.2672 97.7431, 30.2673 97.7432)\",\r\n    \"data\": {\r\n        \"name\": \"New Street\",\r\n        \"length\": 200,\r\n        \"mode\": \"driving\",\r\n        \"speed_limit\": 30,\r\n        \"edge_type\": \"highway\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/edges/12/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"edges",
+								"12",
+								""
+							]
+						},
+						"description": "### **PUT /api/edges/{id}**\n\n**Description:**  \nUpdates an existing edge entry, representing a connection between two nodes. This request modifies the attributes of an existing edge, including its geometry and metadata.\n\n**Constraints:**\n\n- `start_node` and `end_node` must refer to existing nodes.\n    \n- `geom` must be a valid `LINESTRING` geometry.\n    \n- `city` must refer to an existing City.\n    \n- `data` should contain valid values for the following fields:\n    \n    - `name`: The name of the edge (e.g., street name).\n        \n    - `length`: The length of the edge in meters (must be a positive number).\n        \n    - `mode`: The mode of transportation on the edge. Possible values are `pedestrian`, `driving`, `cycling`,`public_transport`.\n        \n    - `speed_limit`: The speed limit for the edge in km/h (must be a positive number).\n        \n    - `edge_type`: The type of the edge. Possible values are `highway`, `urban`, `rural`, `alley`."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Edge",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/edges/11/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"edges",
+								"11",
+								""
+							]
+						},
+						"description": "### **DELETE /api/edges/{id}**\n\n**Description:**  \nDeletes an existing edge entry identified by the `id` parameter."
+					},
+					"response": []
+				}
+			],
+			"description": "This folder contains the endpoints related to the `Edge` model, which represents connections between two nodes in the city's street network. An edge defines a street or pathway between two nodes and includes additional attributes such as length, mode of transportation, speed limit, and edge type. Edges are essential for building the city's transportation network and analyzing mobility."
+		}
+	]
+}
