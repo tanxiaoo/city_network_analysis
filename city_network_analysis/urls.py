@@ -15,14 +15,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
 from streets import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+
+router = DefaultRouter()
+router.register(r'metric-values', views.MetricValueViewSet)
+router.register(r'metrics', views.MetricViewSet)
+router.register(r'cities', views.CityViewSet)
+router.register(r'nodes', views.NodeViewSet)
+router.register(r'edges', views.EdgeViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('db_map/', views.db_map_view, name='db_map'),
-    path('api/db_map/', views.get_data, name='network_data'),
+    # path('api/db_map/', views.get_data, name='network_data'),
     path('city-metrics/', views.city_metrics_page, name='city_metrics_page'),
-    path('api/city-metrics/', views.get_city_metrics, name='get_city_metrics'),
-    path('api/find-similar-cities/', views.find_similar_cities, name='find_similar_cities'),
+    path('api/', include(router.urls)),
 ]

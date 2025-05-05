@@ -2,10 +2,10 @@ import json
 import osmnx as ox
 from django.contrib.gis.geos import Point
 from django.contrib.gis.geos import LineString
-from streets.models import City, CityWalkabilityMetrics, CityBikeabilityMetrics
-import math
-from django.db.models import Count
-from .models import Edge, City, Node, EdgeNode
+from .models import City, Node, Edge, MetricValue, Metric
+from math import log
+from django.utils import timezone
+import numpy as np
 
 
 def fetch_data(city_name: str, country: str, modality: str = "drive"):
@@ -25,75 +25,20 @@ def fetch_data(city_name: str, country: str, modality: str = "drive"):
     return edges_gdf, nodes_gdf
 
 
-def save_edges(city_name: str, edges_gdf, modality: str = "drive"):
-    edges_geojson = json.loads(edges_gdf.to_json())
-    city = City.objects.get(city_name=city_name)
-
-    for feature in edges_geojson['features']:
-        edge_id = feature['id']
-        name = feature['properties'].get('name', 'Unnamed Street')
-        coordinates = feature['geometry']['coordinates']
-        highway_type = feature['properties'].get('highway', '')
-        maxspeed = feature['properties'].get('maxspeed')
-        speed_limit = int(maxspeed[0]) if isinstance(maxspeed, list) and maxspeed else int(maxspeed) if isinstance(maxspeed, str) else None
-
-        if isinstance(highway_type, list):
-            highway_type = set(highway_type)
-        else:
-            highway_type = {highway_type}
-
-        street_type = 'unclassified' if not highway_type else next(iter(highway_type))
-        is_pedestrian = any(t in highway_type for t in ["pedestrian", "footway", "steps", "path"])
-        is_cycling = any(t in highway_type for t in ["cycleway", "living_street", "track"])
-        is_driving = any(t in highway_type for t in [
-            "primary", "secondary", "tertiary", "residential",
-            "unclassified", "motorway", "trunk", "service", "road"])
-
-        if modality == "drive":
-            is_driving = True
-        elif modality == "cycle":
-            is_cycling = True
-        elif modality == "walk":
-            is_pedestrian = True
-
-        geom = LineString([tuple(coord) for coord in coordinates])
-
-        Edge.objects.update_or_create(
-            id=edge_id,
-            city=city,
-            defaults={
-                'name': name,
-                "is_pedestrian": is_pedestrian,
-                "is_cycling": is_cycling,
-                "is_driving": is_driving,
-                "speed_limit": speed_limit,
-                "street_type": street_type,
-                "geom": geom,
-            }
-        )
-
-    print(f"Saved {len(edges_geojson['features'])} streets to the database.")
-
-
 def save_nodes(city_name: str, nodes_gdf):
     nodes_geojson = json.loads(nodes_gdf.to_json())
-    city = City.objects.get(city_name=city_name)
+    city = City.objects.get(name=city_name)
 
     for feature in nodes_geojson["features"]:
-        props = feature["properties"]
-        coord = feature["geometry"]["coordinates"]
-        node_id = int(feature["id"])
-        lat = props.get("y")
-        lon = props.get("x")
-        point = Point(lon, lat)
+        osm_id = int(feature["id"])
+        coords = feature["geometry"]["coordinates"]
+        point = Point(coords)
 
         Node.objects.update_or_create(
-            id=node_id,
+            osm_id=osm_id,
             city=city,
             defaults={
-                'lat': lat,
-                'lon': lon,
-                'elevation': 0.0,
+                'elevation': None,
                 'geom': point
             }
         )
@@ -101,109 +46,156 @@ def save_nodes(city_name: str, nodes_gdf):
     print(f"Saved {len(nodes_geojson['features'])} nodes to the database.")
 
 
-def save_edge_nodes(city_name: str, edges_gdf, nodes_gdf):
+def save_edges(city_name: str, edges_gdf, modality: str = "drive"):
+    highway_type_mapping = {
+        'motorway': 'highway',
+        'motorway_link': 'highway',
+        'trunk': 'highway',
+        'trunk_link': 'highway',
+        'primary': 'urban',
+        'primary_link': 'urban',
+        'secondary': 'urban',
+        'secondary_link': 'urban',
+        'tertiary': 'urban',
+        'unclassified': 'rural',
+        'residential': 'rural',
+        'living_street': 'rural',
+        'service': 'alley',
+        'track': 'alley',
+        'path': 'alley',
+    }
+
     edges_geojson = json.loads(edges_gdf.to_json())
-    nodes_geojson = json.loads(nodes_gdf.to_json())
-    city = City.objects.get(city_name=city_name)
+    city = City.objects.get(name=city_name)
 
-    for edge_feature in edges_geojson['features']:
-        edge_id = edge_feature['id']
-        edge = Edge.objects.get(id=edge_id, city=city)
+    for feature in edges_geojson['features']:
+        properties = feature['properties']
+        coords = feature['geometry']['coordinates']
 
-        coordinates = edge_feature['geometry']['coordinates']
+        edge_id = feature['id']
+        u, v, _ = map(int, edge_id.strip('()').split(', '))
+        try:
+            start_node = Node.objects.get(osm_id=u, city=city)
+            end_node = Node.objects.get(osm_id=v, city=city)
+        except Node.DoesNotExist:
+            print(f"Edge skipped: Node {u} or {v} not found.")
+            continue
 
-        for position, coord in enumerate(coordinates):
-            node_id = None
-            for node_feature in nodes_geojson["features"]:
-                node_coord = node_feature["geometry"]["coordinates"]
-                if node_coord == coord:
-                    node_id = int(node_feature["id"])
-                    break
+        name = properties.get('name')
 
-            if node_id:
-                node = Node.objects.get(id=node_id, city=city)
-                EdgeNode.objects.update_or_create(
-                    edge=edge,
-                    node=node,
-                    position=position,
-                    defaults={
-                    }
-                )
-    print(f"Saved EdgeNode relationships to the database.")
+        maxspeed = properties.get('maxspeed')
+        speed_limit = (
+            int(maxspeed[0]) if isinstance(maxspeed, list) and maxspeed else
+            int(maxspeed) if isinstance(maxspeed, str) and maxspeed.isdigit() else None
+        )
 
+        highway_type = properties.get('highway', '')
+        if isinstance(highway_type, list):
+            highway_type = set(highway_type)
+        else:
+            highway_type = {highway_type}
 
-def save_urban_metrics(city_name: str):
-    city = City.objects.get(city_name=city_name)
-    metrics = calculate_urban_metrics(city_name)
+        edge_type = None
+        for ht in highway_type:
+            mapped_type = highway_type_mapping.get(ht, 'unknown')
+            if mapped_type != 'unknown':
+                edge_type = mapped_type
+                break
 
-    # Save Walkability metrics
-    CityWalkabilityMetrics.objects.update_or_create(
-        city=city,
-        defaults={
-            'POP': 0,  # Placeholder value for POP
-            'CIR': metrics.get('average_circuity', 0),
-            'ORE': metrics.get('street_angle_entropy', 0),
-            'RDE': metrics.get('road_density', 0),
-            'AST': metrics.get('average_steepness', 0),
-            'ASL': metrics.get('average_street_length', 0),
-            'IND': metrics.get('intersection_density', 0),
-            'WDR': metrics.get('walking_driving_ratio', 0),
-            'AWS': metrics.get('average_walking_score', 0),
-            'ACO': metrics.get('connectivity', 0),
-            'SCO': metrics.get('connectivity', 0),
+        if edge_type is None:
+            continue
+
+        valid_modes = {
+            "drive": "driving",
+            "walk": "pedestrian",
+            "bike": "cycling",
+            "public_transport": "public_transport"
         }
-    )
-    print(f"Metrics for {city_name} (walkability) saved successfully.")
+        mode = valid_modes.get(modality, None)
 
-    # Save Bikeability metrics
-    CityBikeabilityMetrics.objects.update_or_create(
-        city=city,
-        defaults={
-            'POP': 0,  # Placeholder value for POP
-            'CIR': metrics.get('average_circuity', 0),
-            'ORE': metrics.get('street_angle_entropy', 0),
-            'RDE': metrics.get('road_density', 0),
-            'AST': metrics.get('average_steepness', 0),
-            'ASL': metrics.get('average_street_length', 0),
-            'IND': metrics.get('intersection_density', 0),
-            'BDR': metrics.get('biking_driving_ratio', 0),
-            'ABS': metrics.get('average_biking_score', 0),
-            'ACO': metrics.get('connectivity', 0),
-            'SCO': metrics.get('connectivity', 0),
-        }
-    )
-    print(f"Metrics for {city_name} (bikeability) saved successfully.")
+        geom = LineString([tuple(coord) for coord in coords])
+
+        # Remove 'id' from update_or_create
+        Edge.objects.update_or_create(
+            city=city,
+            start_node=start_node,
+            end_node=end_node,
+            defaults={
+                'geom': geom,
+                'data': {
+                    'name': name,
+                    'length': feature['properties'].get('length'),
+                    'mode': mode,
+                    'speed_limit': speed_limit,
+                    'edge_type': edge_type
+                }
+            }
+        )
+
+    print(f"Saved {len(edges_geojson['features'])} edges to the database.")
+
+
+def save_metric_values(city_name: str):
+    try:
+        city = City.objects.get(name=city_name)
+    except City.DoesNotExist:
+        print(f"City {city_name} not found.")
+        return
+
+    now = timezone.now()
+
+    metrics_result = calculate_urban_metrics(city_name)
+
+    for metric_key, value in metrics_result.items():
+        try:
+            metric_name, metric_type = metric_key.split('_')
+        except ValueError:
+            print(f"Invalid metric key format: {metric_key}. Skipping.")
+            continue
+
+        try:
+            metric = Metric.objects.get(name=metric_name, type=metric_type)
+        except Metric.DoesNotExist:
+            print(f"Metric {metric_name} with type {metric_type} not found. Skipping.")
+            continue
+
+        MetricValue.objects.update_or_create(
+            city=city,
+            metric=metric,
+            datetime=now,
+            defaults={'value': value}
+        )
+
+    print(f"Metric values for {city_name} have been successfully saved.")
 
 
 def calculate_urban_metrics(city_name: str):
-    city = City.objects.get(city_name=city_name)
+    city = City.objects.get(name=city_name)
 
     # 1. Average Circuity
     total_circuity = 0
     count_circuity = 0
-    for edge in Edge.objects.filter(city=city):
-        nodes = EdgeNode.objects.filter(edge=edge)
-        if nodes.count() == 2:
-            node1, node2 = nodes[0].node, nodes[1].node
+    for edge in Edge.objects.filter(city=city).select_related('start_node', 'end_node'):
+        node1, node2 = edge.start_node, edge.end_node
+        if node1 and node2:
             straight_distance = calculate_distance(node1, node2)
             if straight_distance > 0:
-                circuity = edge.geom.length / straight_distance
+                circuity = edge.geom.length / straight_distance  # 使用 geom 的 length 属性
                 total_circuity += circuity
                 count_circuity += 1
     average_circuity = total_circuity / count_circuity if count_circuity > 0 else 0
 
-    # 2. Orientation Entropy (Street Angle Distribution Entropy)
+    # 2. Orientation Entropy
     street_angles = []
     for edge in Edge.objects.filter(city=city):
-        geom = edge.geom
-        angle = calculate_bearing(geom)
+        angle = calculate_bearing(edge.geom)
         street_angles.append(angle)
     angle_counts = [0] * 36
     for angle in street_angles:
         angle_index = int(angle // 10)
         angle_counts[angle_index] += 1
     total_angles = len(street_angles)
-    entropy = -sum((count / total_angles) * math.log(count / total_angles) for count in angle_counts if count > 0)
+    entropy = -sum((count / total_angles) * log(count / total_angles) for count in angle_counts if count > 0)
 
     # 3. Road Density
     total_street_segments = Edge.objects.filter(city=city).count()
@@ -212,12 +204,11 @@ def calculate_urban_metrics(city_name: str):
     # 4. Average Steepness
     total_steepness = 0
     count_steepness = 0
-    for edge in Edge.objects.filter(city=city):
-        nodes = EdgeNode.objects.filter(edge=edge)
-        if nodes.count() == 2:
-            node1, node2 = nodes[0].node, nodes[1].node
-            elevation_difference = abs(node1.elevation - node2.elevation)
-            horizontal_distance = calculate_distance(node1, node2)
+    for edge in Edge.objects.filter(city=city).select_related('start_node', 'end_node'):
+        node1, node2 = edge.start_node, edge.end_node
+        if node1 and node2:
+            elevation_difference = abs(node1.elevation - node2.elevation) if node1.elevation is not None and node2.elevation is not None else 0
+            horizontal_distance = edge.geom.length  # 直接使用 geom 的长度作为水平距离
             if horizontal_distance > 0:
                 steepness = elevation_difference / horizontal_distance
                 total_steepness += steepness
@@ -225,70 +216,81 @@ def calculate_urban_metrics(city_name: str):
     average_steepness = total_steepness / count_steepness if count_steepness > 0 else 0
 
     # 5. Average Street Length
-    total_length = 0
-    count_length = 0
-    for edge in Edge.objects.filter(city=city):
-        total_length += edge.geom.length
-        count_length += 1
+    edge_lengths = Edge.objects.filter(city=city).values_list('geom', flat=True)
+    total_length = sum(edge.geom.length for edge in Edge.objects.filter(city=city))  # 使用 geom.length
+    count_length = Edge.objects.filter(city=city).count()
     average_street_length = total_length / count_length if count_length > 0 else 0
 
     # 6. Intersection Density
-    intersections = Node.objects.filter(city=city, edgenode__edge__city=city).annotate(edge_count=Count('edgenode'))
-    intersection_count = intersections.filter(edge_count__gte=3).count()
+    all_nodes = Node.objects.filter(city=city)
+    node_edge_counts = {node.id: 0 for node in all_nodes}
+    for edge in Edge.objects.filter(city=city).select_related('start_node', 'end_node'):
+        if edge.start_node_id in node_edge_counts:
+            node_edge_counts[edge.start_node_id] += 1
+        if edge.end_node_id in node_edge_counts:
+            node_edge_counts[edge.end_node_id] += 1
+    intersection_count = sum(1 for count in node_edge_counts.values() if count >= 3)
     intersection_density = intersection_count / city.built_up_area_km2 if city.built_up_area_km2 > 0 else 0
 
     # 7. Walking/Driving Segments Ratio
-    walking_edges = Edge.objects.filter(city=city, is_pedestrian=True).count()
-    driving_edges = Edge.objects.filter(city=city, is_driving=True).count()
+    walking_edges = Edge.objects.filter(city=city, data__mode='pedestrian').count()
+    driving_edges = Edge.objects.filter(city=city, data__mode='driving').count()
     walking_driving_ratio = walking_edges / driving_edges if driving_edges > 0 else 0
 
     # 8. Biking/Driving Segments Ratio
-    biking_edges = Edge.objects.filter(city=city, is_cycling=True).count()
+    biking_edges = Edge.objects.filter(city=city, data__mode='cycling').count()
     biking_driving_ratio = biking_edges / driving_edges if driving_edges > 0 else 0
 
     # 9. Average Biking Score
     total_biking_score = 0
     count_biking = 0
     for edge in Edge.objects.filter(city=city):
-        biking_score = calculate_biking_score(edge.speed_limit, edge.is_cycling)
+        biking_score = calculate_biking_score(edge.data.get('speed_limit', 0), edge.data.get('mode') == 'cycling')
         total_biking_score += biking_score
         count_biking += 1
-
     average_biking_score = total_biking_score / count_biking if count_biking > 0 else 0
 
     # 10. Average Walking Score
     total_walking_score = 0
     count_walking = 0
     for edge in Edge.objects.filter(city=city):
-        walking_score = calculate_walking_score(edge.speed_limit, edge.is_pedestrian)
+        walking_score = calculate_walking_score(edge.data.get('speed_limit', 0), edge.data.get('mode') == 'pedestrian')
         total_walking_score += walking_score
         count_walking += 1
-
     average_walking_score = total_walking_score / count_walking if count_walking > 0 else 0
 
     # 11. Connectivity
-    nodes = Node.objects.filter(city=city)
-    total_degree = 0
-    node_count = nodes.count()
-
-    for node in nodes:
-        degree = EdgeNode.objects.filter(node=node).count()
-        total_degree += degree
-
+    node_edge_counts = {node.id: 0 for node in all_nodes}  # Reinitialize node_edge_counts
+    for edge in Edge.objects.filter(city=city).select_related('start_node', 'end_node'):
+        node_edge_counts[edge.start_node_id] += 1
+        node_edge_counts[edge.end_node_id] += 1
+    total_degree = sum(node_edge_counts.values())
+    node_count = len(node_edge_counts)
     connectivity = total_degree / node_count if node_count > 0 else 0
+    degrees = list(node_edge_counts.values())
+    connectivity_std = np.std(degrees) if degrees else 0
 
     return {
-        'average_circuity': average_circuity,
-        'street_angle_entropy': entropy,
-        'road_density': road_density,
-        'average_steepness': average_steepness,
-        'average_street_length': average_street_length,
-        'intersection_density': intersection_density,
-        'walking_driving_ratio': walking_driving_ratio,
-        'biking_driving_ratio': biking_driving_ratio,
-        'average_biking_score': average_biking_score,
-        'average_walking_score': average_walking_score,
-        'connectivity': connectivity
+        'CIR_walk': average_circuity,
+        'CIR_bike': average_circuity,
+        'ORE_walk': entropy,
+        'ORE_bike': entropy,
+        'RDE_walk': road_density,
+        'RDE_bike': road_density,
+        'AST_walk': average_steepness,
+        'AST_bike': average_steepness,
+        'ASL_walk': average_street_length,
+        'ASL_bike': average_street_length,
+        'IND_walk': intersection_density,
+        'IND_bike': intersection_density,
+        'WDR_walk': walking_driving_ratio,
+        'BDR_bike': biking_driving_ratio,
+        'AWS_walk': average_walking_score,
+        'ABS_bike': average_biking_score,
+        'ACO_walk': connectivity,
+        'ACO_bike': connectivity,
+        'SCO_walk': connectivity_std,
+        'SCO_bike': connectivity_std,
     }
 
 

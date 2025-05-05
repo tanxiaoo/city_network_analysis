@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "leaflet",
     "streets",
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
