@@ -28,8 +28,8 @@ class MetricSimplifiedSerializer(serializers.ModelSerializer):
 
 
 class MetricValueSerializer(serializers.ModelSerializer):
-    city = CitySimplifiedSerializer()
-    metric = MetricSimplifiedSerializer()
+    metric = serializers.PrimaryKeyRelatedField(queryset=Metric.objects.all())
+    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all())
 
     class Meta:
         model = MetricValue

@@ -15,10 +15,6 @@ class City(models.Model):
     name = models.CharField(max_length=255, unique=True)
     country = models.CharField(max_length=255)
     geo_area = models.ForeignKey(GeoAreaMapping, on_delete=models.CASCADE)
-    population = models.PositiveIntegerField(null=True, blank=True)
-    area_km2 = models.FloatField()
-    built_up_area_km2 = models.FloatField()
-    geom = models.MultiPolygonField(null=True, blank=True, default=MultiPolygon())
 
     def __str__(self):
         return self.name

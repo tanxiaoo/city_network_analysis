@@ -1,0 +1,58 @@
+[
+  {
+    "model": "streets.geoareamapping",
+    "pk": "SA",
+    "fields": {
+      "full_name": "South America"
+    }
+  },
+  {
+    "model": "streets.geoareamapping",
+    "pk": "NA",
+    "fields": {
+      "full_name": "North America"
+    }
+  },
+  {
+    "model": "streets.geoareamapping",
+    "pk": "CA",
+    "fields": {
+      "full_name": "Central America"
+    }
+  },
+  {
+    "model": "streets.geoareamapping",
+    "pk": "EU",
+    "fields": {
+      "full_name": "Europe"
+    }
+  },
+  {
+    "model": "streets.geoareamapping",
+    "pk": "AS",
+    "fields": {
+      "full_name": "Asia"
+    }
+  },
+  {
+    "model": "streets.geoareamapping",
+    "pk": "ME",
+    "fields": {
+      "full_name": "Middle East"
+    }
+  },
+  {
+    "model": "streets.geoareamapping",
+    "pk": "OC",
+    "fields": {
+      "full_name": "Oceania"
+    }
+  },
+  {
+    "model": "streets.geoareamapping",
+    "pk": "AF",
+    "fields": {
+      "full_name": "Africa"
+    }
+  }
+]
