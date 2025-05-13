@@ -23,7 +23,8 @@ class City(models.Model):
 class Metric(models.Model):
     METRICS_TYPES = [
         ("walk","Walkability"),
-        ("bike","Bikeability")
+        ("bike","Bikeability"),
+        ("drive","Drivability"),
     ]
 
     name = models.CharField(max_length=50)

@@ -75,6 +75,8 @@ class MetricValueViewSet(viewsets.ModelViewSet):
 class MetricViewSet(viewsets.ModelViewSet):
     queryset = Metric.objects.all()
     serializer_class = MetricSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ['name', 'type']
 
     @action(detail=False, methods=['post'], url_path='bulk_create')
     def bulk_create(self, request):

@@ -9,6 +9,8 @@ import osmnx as ox
 import shapely
 from django.contrib.gis.geos import GEOSGeometry
 from datetime import datetime
+import pandas as pd
+import requests
 
 
 geo_area_data = [
@@ -119,3 +121,52 @@ def save_milan_metric_values():
                 datetime=test_date,
                 defaults={"value": value}
             )
+
+
+BASE_URL = "http://localhost:8000/api"
+CITY_API = f"{BASE_URL}/cities/"
+METRIC_API = f"{BASE_URL}/metric-types/"
+BULK_UPLOAD_API = f"{BASE_URL}/metric-values/bulk_create/"
+DATETIME = datetime.utcnow().isoformat() + "Z"
+
+def save_metric_values(csv_path):
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    df = pd.read_csv(csv_path)
+    metric_cols = [col for col in df.columns if col.lower() != "city"]
+
+    city_data = requests.get(CITY_API).json()
+    metric_data = requests.get(METRIC_API).json()
+
+    city_map = {c["name"].lower(): c["id"] for c in city_data}
+    metric_map = {m["name"]: m["id"] for m in metric_data}
+
+    metric_value = []
+    for _, row in df.iterrows():
+        city_id = city_map.get(row["city"].lower())
+        if not city_id:
+            print(f"City '{row['city']}' not found.")
+            continue
+
+        for col in metric_cols:
+            metric_id = metric_map.get(col)
+            if not metric_id:
+                print(f"Metric '{col}' not found. Skipping this metric.")
+                continue
+            metric_value.append({
+                "city": city_id,
+                "metric": metric_id,
+                "value": row[col],
+                "datetime": DATETIME
+            })
+
+    if metric_value:
+        res = requests.post(BULK_UPLOAD_API, json=payload, headers=headers)
+        if res.status_code == 201:
+            print(f"Successfully uploaded {len(payload)} metric values.")
+        else:
+            print(f"Upload failed: {res.status_code} → {res.text}")
+    else:
+        print("No valid data to upload.")
