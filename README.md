@@ -59,9 +59,6 @@ erDiagram
         string name "Unique city name"
         string country "Country name"
         char geo_area FK "FK to GeoAreaMapping"
-        int population "Population (nullable)"
-        float area_km2 "Area in square kilometers"
-        float built_up_area_km2 "Built-up area in square kilometers"
         multipolygon geom "Geometry of the city (nullable)"
     }
 
@@ -109,40 +106,52 @@ A full Postman collection is provided for testing and reproducibility.
 
 #### City Endpoints
 - `GET /api/cities/` - Get All Cities
+- `GET /api/cities/?search={city_name}` - Get City by Name
 - `POST /api/cities/` - Create City
-- `PUT /api/cities/{id}/` - Update City
+- `POST /api/cities/bulk_create/` - Bulk Create City
+- `PUT /api/cities/{id}` - Update City
 - `DELETE /api/cities/{id}/` - Delete City
+- `DELETE /api/cities/delete_graph/?city={city_name}` - Delete Graph
+- `DELETE /api/cities/delete_metric_value/?city={city_name}` - Delete Delete Metric Value
 
 #### Metric Endpoints
 - `GET /api/metrics/` - Get All Metrics
+- `GET /api/metrics/?search={name} {type}` - Get Metric by Name and Type
 - `POST /api/metrics/` - Create Metric
+- `POST /api/metrics/bulk_create/` - Bulk Create Metric
 - `PUT /api/metrics/{id}/` - Update Metric
 - `DELETE /api/metrics/{id}/` - Delete Metric
 
 #### MetricValue Endpoints
 - `GET /api/metricvalues/` - Get All Metric Values
-- `GET /api/metricvalues/filtered/` - Get Filtered Metric Values
+- `GET GET /api/metric-values/?city_name={city_name}` - Get Filtered Metric Values
 - `POST /api/metricvalues/` - Create MetricValue
+- `POST /api/metric-values/bulk_create/` - Bulk Create MetricValue
 - `PUT /api/metricvalues/{id}/` - Update MetricValue
 - `DELETE /api/metricvalues/{id}/` - Delete MetricValue
 
 #### Node Endpoints
 - `GET /api/nodes/` - Get All Nodes
 - `GET /api/nodes/city/{city_id}/` - Get Nodes by City
+- `GET /geojson/nodes/?city={city_name}` - Get Nodes as GeoJSON
 - `POST /api/nodes/` - Create Node
+- `POST /api/nodes/bulk_create/` - Bulk Create Node
 - `PUT /api/nodes/{id}/` - Update Node
 - `DELETE /api/nodes/{id}/` - Delete Node
 
 #### Edge Endpoints
 - `GET /api/edges/` - Get All Edges
 - `GET /api/edges/city/{city_id}/` - Get Edges by City
+- `GET /geojson/edges/?city={city_name}` - Get Edges as GeoJSON
 - `POST /api/edges/` - Create Edge
+- `POST /api/edges/bulk_create/` - Bulk Create Edge
 - `PUT /api/edges/{id}/` - Update Edge
 - `DELETE /api/edges/{id}/` - Delete Edge
 
 **Access the collection**:  
-- [Postman Collection Link](https://xiaotan-6436217.postman.co/workspace/xiao-tan's-Workspace~73cb4ce1-4af2-4705-896a-9af5177494b9/collection/44577322-cd2a15fa-72f4-4adb-96b3-b6583872cb4c?action=share&creator=44577322)
-- You can also import the Urban Metrics API.postman_collection.json file provided in the repository directly into Postman.
+- [Postman Collection Link](https://xiaotan-6436217.postman.co/workspace/xiao-tan's-Workspace~73cb4ce1-4af2-4705-896a-9af5177494b9/collection/44577322-cd2a15fa-72f4-4adb-96b3-b6583872cb4c?action=share&creator=44577322)  
+- You can also import the `Urban Metrics API.postman_collection.json` file provided in the repository directly into Postman.  
+- You can view the complete documentation for the Urban Metrics API collection, including detailed descriptions, constraints,and examples, in the Urban Metrics API collection folder> ["Complete Documentation"](https://xiaotan-6436217.postman.co/workspace/73cb4ce1-4af2-4705-896a-9af5177494b9/documentation/44577322-cd2a15fa-72f4-4adb-96b3-b6583872cb4c) section.
 
 ## Setup and Installation
 
