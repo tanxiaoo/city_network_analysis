@@ -206,7 +206,7 @@ The web application will be available at http://localhost:8000.
 ## Database Population Guide
 
 ### 1. GeoAreaMapping Data
-The system will automatically insert the following geographic area mappings:
+Once the project is up and running using Docker, the system will automatically insert the following geographic area mappings:
 
 | Code | Region           |
 |------|------------------|
