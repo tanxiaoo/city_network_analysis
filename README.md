@@ -161,8 +161,18 @@ git clone https://github.com/tanxiaoo/city_network_analysis.git
 cd city_network_analysis
 ```
 
+### 2. Modify the Settings File
 
-### 2. Build and Start the Services
+Before building and starting the services, open the `city_network_analysis/settings.py` file and comment out the following two lines of code(if they exist):
+
+```python
+GDAL_LIBRARY_PATH = (r"D:\06_Polimi\2024-2025\02_Semester4\Project\city_network_analysis\.venv\Lib\site-packages\osgeo"
+                     r"\gdal.dll")
+
+os.environ['GDAL_LIBRARY_PATH'] = GDAL_LIBRARY_PATH
+```
+
+### 3. Build and Start the Services
 
 Run the following command to build the Docker images and start the services:
 ```bash
@@ -174,17 +184,8 @@ This command will:
 - Start the web service (Django) and database (PostgreSQL)
 - Make the project accessible at http://localhost:8000
 
-### 3. Initialize the Database (First Time Only)
+The database will be automatically initialized during the first startup.
 
-If it's your first time running the project, initialize the database with:
-```bash
-docker-compose exec web python manage.py migrate
-docker-compose exec web python manage.py createsuperuser
-```
-
-Where:
-- `migrate`: Applies database migrations
-- `createsuperuser`: Creates an admin user to access the Django admin interface
 
 ### 4. Running the Project
 
