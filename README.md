@@ -59,7 +59,6 @@ erDiagram
         string name "Unique city name"
         string country "Country name"
         char geo_area FK "FK to GeoAreaMapping"
-        multipolygon geom "Geometry of the city (nullable)"
     }
 
     Metric {
