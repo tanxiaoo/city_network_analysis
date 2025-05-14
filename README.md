@@ -201,5 +201,42 @@ After the initial setup, you can start the project anytime with:
 ```bash
 docker-compose up
 ```
-
 The web application will be available at http://localhost:8000.
+
+## Database Population Guide
+
+### 1. GeoAreaMapping Data
+The system will automatically insert the following geographic area mappings:
+
+| Code | Region           |
+|------|------------------|
+| SA   | South America    |
+| NA   | North America    |
+| CA   | Central America  |
+| EU   | Europe           |
+| AS   | Asia             |
+| ME   | Middle East      |
+| OC   | Oceania          |
+| AF   | Africa           |
+
+### 2. City and Metric Data Population
+After starting the backend at [http://localhost:8000](http://localhost:8000), use Postman to populate data:
+
+**Cities**:
+- Path: `City > Bulk Create City`
+- Action: Send (pre-loaded sample data)
+
+**Metrics**:
+- Path: `Metric > Bulk Create Metric` 
+- Action: Send (pre-loaded sample data)
+
+### 3. Bulk Upload of Graph Data and Metrics
+
+To automate the upload of street network (Node and Edge) data and graph-based metric values, a companion repository is provided:
+
+**Repository:** 🔗 [save_graph_metircvalue repository](https://github.com/tanxiaoo/save_graph_metircvalue)
+
+**Includes:**
+- Python scripts and a Jupyter notebook for uploading data via API
+- Instructions for setup and use
+- Provides test data including graph(.graphml) for Node and Edge and metric value tables(.csv) for MetricValue.
