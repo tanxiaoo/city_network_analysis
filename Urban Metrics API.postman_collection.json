@@ -5,7 +5,7 @@
 		"description": "A collection of all API endpoints for the urban metrics system.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "44577322",
-		"_collection_link": "https://xiaotan-6436217.postman.co/workspace/xiao-tan's-Workspace~73cb4ce1-4af2-4705-896a-9af5177494b9/collection/44577322-cd2a15fa-72f4-4adb-96b3-b6583872cb4c?action=share&source=collection_link&creator=44577322"
+		"_collection_link": "https://xiaotan-6436217.postman.co/workspace/73cb4ce1-4af2-4705-896a-9af5177494b9/collection/44577322-cd2a15fa-72f4-4adb-96b3-b6583872cb4c?action=share&source=collection_link&creator=44577322"
 	},
 	"item": [
 		{
@@ -36,10 +36,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{HOSTNAME}}/api/cities/",
+									"raw": "http://localhost:8000/api/cities/",
+									"protocol": "http",
 									"host": [
-										"{{HOSTNAME}}"
+										"localhost"
 									],
+									"port": "8000",
 									"path": [
 										"api",
 										"cities",
@@ -128,10 +130,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{HOSTNAME}}/api/cities/?search=bucharest",
+									"raw": "http://localhost:8000/api/cities/?search=bucharest",
+									"protocol": "http",
 									"host": [
-										"{{HOSTNAME}}"
+										"localhost"
 									],
+									"port": "8000",
 									"path": [
 										"api",
 										"cities",
@@ -354,7 +358,7 @@
 								}
 							]
 						},
-						"description": "**Description:**  \nDeletes the metric values associated with the specified city. The request is performed based on the `city` parameter.\n\n- If the `city` parameter is provided, only the metric values for that specific city will be deleted.\n    \n- If the `city` parameter is omitted, all metric values in the system will be deleted."
+						"description": "### **DELETE /api/cities/delete_metric_value/?city={city_name}**\n\n**Description:**  \nDeletes the metric values associated with the specified city. The request is performed based on the `city` parameter.\n\n- If the `city` parameter is provided, only the metric values for that specific city will be deleted.\n    \n- If the `city` parameter is omitted, all metric values in the system will be deleted."
 					},
 					"response": []
 				}
@@ -380,7 +384,7 @@
 								""
 							]
 						},
-						"description": "GET /api/metrics/  \nReturns a list of all metrics available in the system."
+						"description": "### **GET /api/metrics/**\n\nReturns a list of all metrics available in the system."
 					},
 					"response": [
 						{
@@ -389,10 +393,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{HOSTNAME}}/api/metrics/",
+									"raw": "http://localhost:8000/api/metrics/",
+									"protocol": "http",
 									"host": [
-										"{{HOSTNAME}}"
+										"localhost"
 									],
+									"port": "8000",
 									"path": [
 										"api",
 										"metrics",
@@ -451,7 +457,7 @@
 					]
 				},
 				{
-					"name": "Get Metric by Name",
+					"name": "Get Metric by Name and Type",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -481,10 +487,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{HOSTNAME}}/api/metrics/?search=walk_cir walk",
+									"raw": "http://localhost:8000/api/metrics/?search=walk_cir walk",
+									"protocol": "http",
 									"host": [
-										"{{HOSTNAME}}"
+										"localhost"
 									],
+									"port": "8000",
 									"path": [
 										"api",
 										"metrics",
@@ -701,10 +709,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{HOSTNAME}}/api/metric-values/",
+									"raw": "http://localhost:8000/api/metric-values/",
+									"protocol": "http",
 									"host": [
-										"{{HOSTNAME}}"
+										"localhost"
 									],
+									"port": "8000",
 									"path": [
 										"api",
 										"metric-values",
@@ -805,7 +815,7 @@
 								}
 							]
 						},
-						"description": "### **GET /api/metricvalues/**\n\n**Description:**\n\nThis endpoint allows you to retrieve a filtered list of metric values based on specified query parameters. You can filter the results by the following parameters:\n\n- **city_name**: Filter the results based on the name of the city (e.g., `Milan`).\n    \n- **metric_name**: Filter the results based on the name of the metric (e.g., `CIR`).\n    \n- **metric_type**: Filter the results by metric type, which could be `walk` or `bike`.\n    \n- **start_date**: Filter the results by the start date of the metric value (e.g., `2025-05-01`).\n    \n- **end_date**: Filter the results by the end date of the metric value (e.g., `2025-05-12`).\n    \n\nThe combination of these filters will return the metric values that match all provided criteria. If no parameters are provided, it will return all available metric values in the system."
+						"description": "### **GET /api/metric-values/?city_name={city_name}&...**\n\n**Description:**\n\nThis endpoint allows you to retrieve a filtered list of metric values based on specified query parameters. You can filter the results by the following parameters:\n\n- **city_name**: Filter the results based on the name of the city (e.g., `Milan`).\n    \n- **metric_name**: Filter the results based on the name of the metric (e.g., `CIR`).\n    \n- **metric_type**: Filter the results by metric type, which could be `walk` or `bike`.\n    \n- **start_date**: Filter the results by the start date of the metric value (e.g., `2025-05-01`).\n    \n- **end_date**: Filter the results by the end date of the metric value (e.g., `2025-05-12`).\n    \n\nThe combination of these filters will return the metric values that match all provided criteria. If no parameters are provided, it will return all available metric values in the system."
 					},
 					"response": [
 						{
@@ -814,10 +824,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{HOSTNAME}}/api/metric-values/?city_name=bucharest&metric_name=walk_cir&metric_type=walk",
+									"raw": "http://localhost:8000/api/metric-values/?city_name=bucharest&metric_name=walk_cir&metric_type=walk",
+									"protocol": "http",
 									"host": [
-										"{{HOSTNAME}}"
+										"localhost"
 									],
+									"port": "8000",
 									"path": [
 										"api",
 										"metric-values",
@@ -1078,10 +1090,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{HOSTNAME}}/api/nodes/?city=8",
+									"raw": "http://localhost:8000/api/nodes/?city=8",
+									"protocol": "http",
 									"host": [
-										"{{HOSTNAME}}"
+										"localhost"
 									],
+									"port": "8000",
 									"path": [
 										"api",
 										"nodes",
@@ -1181,10 +1195,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{HOSTNAME}}/geojson/nodes/?city=sucre",
+									"raw": "http://localhost:8000/geojson/nodes/?city=sucre",
+									"protocol": "http",
 									"host": [
-										"{{HOSTNAME}}"
+										"localhost"
 									],
+									"port": "8000",
 									"path": [
 										"geojson",
 										"nodes",
@@ -1444,10 +1460,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{HOSTNAME}}/api/edges/?city=45",
+									"raw": "http://localhost:8000/api/edges/?city=45",
+									"protocol": "http",
 									"host": [
-										"{{HOSTNAME}}"
+										"localhost"
 									],
+									"port": "8000",
 									"path": [
 										"api",
 										"edges",
@@ -1513,10 +1531,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{HOSTNAME}}/geojson/edges/?city=sucre",
+									"raw": "http://localhost:8000/geojson/edges/?city=sucre",
+									"protocol": "http",
 									"host": [
-										"{{HOSTNAME}}"
+										"localhost"
 									],
+									"port": "8000",
 									"path": [
 										"geojson",
 										"edges",
