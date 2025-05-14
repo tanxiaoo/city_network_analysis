@@ -232,7 +232,7 @@ After starting the backend at [http://localhost:8000](http://localhost:8000), us
 
 ### 3. Bulk Upload of Graph Data and Metrics
 
-To automate the upload of street network (Node and Edge) data and graph-based metric values, a companion repository is provided:
+To automate the upload of street network (Node and Edge) data and metric values, a companion repository is provided:
 
 **Repository:** 🔗 [save_graph_metircvalue repository](https://github.com/tanxiaoo/save_graph_metircvalue)
 
